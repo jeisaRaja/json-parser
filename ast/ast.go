@@ -11,6 +11,13 @@ type ObjectNode struct {
 	Pairs []*PairNode
 }
 
+func (on *ObjectNode) String() string {
+	return ""
+}
+func (on *ObjectNode) TokenLiteral() string {
+	return ""
+}
+
 type PairNode struct {
 	Key   *StringNode
 	Value Node
@@ -33,6 +40,7 @@ type NumberNode struct {
 	Token token.Token
 	Value float32
 }
+
 func (nn *NumberNode) TokenLiteral() string {
 	return nn.Token.Literal
 }

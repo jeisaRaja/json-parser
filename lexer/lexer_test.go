@@ -19,6 +19,7 @@ func TestLexer(t *testing.T) {
 
 	for i, tt := range tests {
 		tok := l.NextToken()
+		t.Log(tok)
 		if tok.Type != tt.expectedType {
 			t.Fatalf("tests[%d] - token type wrong. expected %q, got %q", i, tt.expectedType, tok.Type)
 		}
