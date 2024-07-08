@@ -12,6 +12,8 @@ type Parser struct {
 
 	curToken  token.Token
 	peekToken token.Token
+
+	errors []string
 }
 
 func New(l *lexer.Lexer) *Parser {
@@ -26,22 +28,42 @@ func (p *Parser) nextToken() {
 	p.peekToken = p.lexer.NextToken()
 }
 
-func (p *Parser) parseJSON() ast.Node {
+func (p *Parser) parseJSON() int {
 	switch p.curToken.Type {
 	case token.LBRACE:
-		return p.parseObjectNode()
+		p.parseObjectNode()
 	}
-	return nil
+	if len(p.errors) > 0 {
+		return -1
+	}
+	return 0
 }
 
 func (p *Parser) parseObjectNode() *ast.ObjectNode {
 	var obj = &ast.ObjectNode{}
 	if p.curToken.Type != token.LBRACE {
-		panic("not valid JSON")
+		p.error("Not correct")
 	}
-  for p.curToken.Type != token.RBRACE{
-    fmt.Println("looping inside an obj")
-  }
+	for p.curToken.Type != token.RBRACE {
+		p.nextToken()
+		fmt.Println("looping inside an obj")
+	}
 
-	return nil
+	if !p.peekTokenIs(token.EOF) {
+		p.error("Not Valid, something after end of closing brace")
+		return obj
+	}
+	return obj
+}
+
+func (p *Parser) peekTokenIs(t token.TokenType) bool {
+	return t == p.peekToken.Type
+}
+
+func (p *Parser) curTokenIs(t token.TokenType) bool {
+	return t == p.curToken.Type
+}
+
+func (p *Parser) error(s string) {
+	p.errors = append(p.errors, s)
 }

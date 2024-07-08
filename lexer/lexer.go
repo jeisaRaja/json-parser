@@ -20,7 +20,7 @@ func New(input string) *Lexer {
 func (l *Lexer) NextToken() token.Token {
 	var tok token.Token
 
-  l.skipWhitespace()
+	l.skipWhitespace()
 
 	switch l.ch {
 	case '{':
@@ -29,6 +29,9 @@ func (l *Lexer) NextToken() token.Token {
 	case '}':
 		tok.Type = token.RBRACE
 		tok.Literal = string(l.ch)
+	case 0:
+		tok.Type = token.EOF
+		tok.Literal = ""
 	}
 	l.readChar()
 	return tok

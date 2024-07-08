@@ -13,6 +13,7 @@ func TestLexer(t *testing.T) {
 	}{
 		{token.LBRACE, "{"},
 		{token.RBRACE, "}"},
+    {token.EOF, ""},
 	}
 
 	l := New(input)
