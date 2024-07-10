@@ -2,6 +2,7 @@ package lexer
 
 import (
 	"jeisaraja/json_parser/token"
+	"strings"
 )
 
 type Lexer struct {
@@ -34,11 +35,16 @@ func (l *Lexer) NextToken() token.Token {
 		tok.Literal = ":"
 	case '"':
 		tok.Type = token.STRING
-		l.readChar()
 		tok.Literal = l.readString()
 	case ',':
 		tok.Type = token.COMMA
 		tok.Literal = ","
+	case '[':
+		tok.Type = token.LBRACKET
+		tok.Literal = "["
+	case ']':
+		tok.Type = token.RBRACKET
+		tok.Literal = "]"
 	case 0:
 		tok.Type = token.EOF
 		tok.Literal = ""
@@ -81,11 +87,38 @@ func isDigit(char byte) bool {
 }
 
 func (l *Lexer) readString() string {
-	pos := l.position
-	for l.ch != '"' {
+	var strBuilder strings.Builder
+	for {
 		l.readChar()
+		if l.ch == '"' || l.ch == 0 {
+			break
+		}
+		if l.ch == '\\' {
+			l.readChar()
+			switch l.ch {
+			case 'n':
+				strBuilder.WriteByte('\n')
+			case 't':
+				strBuilder.WriteByte('\t')
+			case 'r':
+				strBuilder.WriteByte('\r')
+			case 'b':
+				strBuilder.WriteByte('\b')
+			case 'f':
+				strBuilder.WriteByte('\f')
+			case '\\':
+				strBuilder.WriteByte('\\')
+			case '"':
+				strBuilder.WriteByte('"')
+			default:
+				strBuilder.WriteByte('\\')
+				strBuilder.WriteByte(l.ch)
+			}
+		} else {
+			strBuilder.WriteByte(l.ch)
+		}
 	}
-	return l.input[pos:l.position]
+	return strBuilder.String()
 }
 
 func (l *Lexer) readNumber() string {
