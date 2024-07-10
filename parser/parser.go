@@ -44,9 +44,16 @@ func (p *Parser) parseObjectNode() *ast.ObjectNode {
 	if p.curToken.Type != token.LBRACE {
 		p.error("Not correct")
 	}
-	for p.curToken.Type != token.RBRACE {
+
+	for !p.curTokenIs(token.RBRACE) {
+		if p.curTokenIs(token.EOF) {
+			p.error("Unexpected EOF")
+      return obj
+		}
+		if !p.peekTokenIs(token.STRING) {
+			p.error("Key is not token.STRING")
+		}
 		p.nextToken()
-		fmt.Println("looping inside an obj")
 	}
 
 	if !p.peekTokenIs(token.EOF) {
@@ -57,6 +64,7 @@ func (p *Parser) parseObjectNode() *ast.ObjectNode {
 }
 
 func (p *Parser) peekTokenIs(t token.TokenType) bool {
+  fmt.Println(p.peekToken)
 	return t == p.peekToken.Type
 }
 

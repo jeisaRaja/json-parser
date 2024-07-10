@@ -6,12 +6,13 @@ import (
 )
 
 func TestLexer(t *testing.T) {
-	input := "{}"
+  input := "{\"yeah\": \"name\"}"
 	tests := []struct {
 		expectedType    token.TokenType
 		expectedLiteral string
 	}{
 		{token.LBRACE, "{"},
+		{token.STRING, "yeah"},
 		{token.RBRACE, "}"},
     {token.EOF, ""},
 	}

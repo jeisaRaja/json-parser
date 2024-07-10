@@ -7,7 +7,7 @@ import (
 )
 
 func TestParser(t *testing.T) {
-	input := "{}"
+  input := "{\"yeah\": \"name\"}"
 	l := lexer.New(input)
 	p := New(l)
 
