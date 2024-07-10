@@ -1,6 +1,7 @@
 package lexer
 
 import (
+	"fmt"
 	"jeisaraja/json_parser/token"
 )
 
@@ -29,16 +30,20 @@ func (l *Lexer) NextToken() token.Token {
 	case '}':
 		tok.Type = token.RBRACE
 		tok.Literal = string(l.ch)
+	case ':':
+		tok.Type = token.COLON
+		tok.Literal = ":"
+	case '"':
+		tok.Type = token.STRING
+		l.readChar()
+		if isLetter(l.ch) {
+			tok.Literal = l.readString()
+		}
 	case 0:
 		tok.Type = token.EOF
 		tok.Literal = ""
 	default:
-		if isLetter(l.ch) {
-			tok.Type = token.STRING
-			tok.Literal = l.readString()
-		} else {
-      l.readChar()
-    }
+		fmt.Println("colon")
 	}
 	l.readChar()
 	return tok
@@ -69,5 +74,5 @@ func (l *Lexer) readString() string {
 	for isLetter(l.ch) {
 		l.readChar()
 	}
-	return l.input[pos:l.readPosition]
+	return l.input[pos:l.position]
 }

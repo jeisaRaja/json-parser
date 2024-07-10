@@ -13,6 +13,8 @@ func TestLexer(t *testing.T) {
 	}{
 		{token.LBRACE, "{"},
 		{token.STRING, "yeah"},
+    {token.COLON, ":"},
+		{token.STRING, "name"},
 		{token.RBRACE, "}"},
     {token.EOF, ""},
 	}
@@ -21,12 +23,12 @@ func TestLexer(t *testing.T) {
 
 	for i, tt := range tests {
 		tok := l.NextToken()
-		t.Log(tok)
+    t.Log(input, tok)
 		if tok.Type != tt.expectedType {
 			t.Fatalf("tests[%d] - token type wrong. expected %q, got %q", i, tt.expectedType, tok.Type)
 		}
 		if tok.Literal != tt.expectedLiteral {
-			t.Fatalf("tests[%d] - token literal wrong. expected %q, got %q", i, tt.expectedLiteral, tok.Type)
+			t.Fatalf("tests[%d] - token literal wrong. expected %q, got %q", i, tt.expectedLiteral, tok.Literal)
 		}
 	}
 }
