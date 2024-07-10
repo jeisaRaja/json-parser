@@ -1,7 +1,6 @@
 package lexer
 
 import (
-	"fmt"
 	"jeisaraja/json_parser/token"
 )
 
@@ -36,14 +35,26 @@ func (l *Lexer) NextToken() token.Token {
 	case '"':
 		tok.Type = token.STRING
 		l.readChar()
-		if isLetter(l.ch) {
-			tok.Literal = l.readString()
-		}
+		tok.Literal = l.readString()
+	case ',':
+		tok.Type = token.COMMA
+		tok.Literal = ","
 	case 0:
 		tok.Type = token.EOF
 		tok.Literal = ""
 	default:
-		fmt.Println("colon")
+		if isLetter(l.ch) {
+			tok.Literal = l.readIdentifier()
+			tok.Type = lookupIdent(tok.Literal)
+			return tok
+		} else if isDigit(l.ch) {
+			tok.Type = token.NUMBER
+			tok.Literal = l.readNumber()
+			return tok
+		} else {
+			tok.Type = token.ILLEGAL
+			tok.Literal = ""
+		}
 	}
 	l.readChar()
 	return tok
@@ -65,14 +76,46 @@ func (l *Lexer) skipWhitespace() {
 	}
 }
 
-func isLetter(char byte) bool {
-	return char >= 'a' && char <= 'z' || char >= 'A' && char <= 'Z'
+func isDigit(char byte) bool {
+	return char >= '0' && char <= '9'
 }
 
 func (l *Lexer) readString() string {
 	pos := l.position
-	for isLetter(l.ch) {
+	for l.ch != '"' {
 		l.readChar()
 	}
 	return l.input[pos:l.position]
+}
+
+func (l *Lexer) readNumber() string {
+	pos := l.position
+	for isDigit(l.ch) {
+		l.readChar()
+	}
+	return l.input[pos:l.position]
+}
+
+func (l *Lexer) readIdentifier() string {
+	position := l.position
+	for isLetter(l.ch) {
+		l.readChar()
+	}
+	return l.input[position:l.position]
+}
+
+func isLetter(ch byte) bool {
+	return 'a' <= ch && ch <= 'z' || 'A' <= ch && ch <= 'Z' || ch == '_'
+}
+
+func lookupIdent(ident string) token.TokenType {
+	switch ident {
+	case "true":
+		return token.TRUE
+	case "false":
+		return token.FALSE
+	case "null":
+		return token.NULL
+	}
+	return token.ILLEGAL
 }

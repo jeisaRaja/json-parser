@@ -18,7 +18,7 @@ const (
 	COLON    = ":"
 	COMMA    = ","
 
-	INT    = "INT"
+	NUMBER = "NUMBER"
 	STRING = "STRING"
 
 	TRUE  = "TRUE"
