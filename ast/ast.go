@@ -1,6 +1,9 @@
 package ast
 
-import "jeisaraja/json_parser/token"
+import (
+	"fmt"
+	"jeisaraja/json_parser/token"
+)
 
 type Node interface {
 	TokenLiteral() string
@@ -11,9 +14,23 @@ type ObjectNode struct {
 	Pairs []*PairNode
 }
 
+type ArrayNode struct {
+	Value []Node
+}
+
+type BooleanNode struct {
+	Token token.Token
+	Value bool
+}
+
+type NullNode struct {
+	Token token.Token
+}
+
 func (on *ObjectNode) String() string {
 	return ""
 }
+
 func (on *ObjectNode) TokenLiteral() string {
 	return ""
 }
@@ -33,7 +50,7 @@ func (sn *StringNode) TokenLiteral() string {
 }
 
 func (sn *StringNode) String() string {
-	return sn.Token.Literal
+	return fmt.Sprintf("StringNode{Token: %s, Value: %s}", sn.Token.Type, sn.Value)
 }
 
 type NumberNode struct {
@@ -47,4 +64,28 @@ func (nn *NumberNode) TokenLiteral() string {
 
 func (nn *NumberNode) String() string {
 	return nn.Token.Literal
+}
+
+func (bn *BooleanNode) String() string {
+	return bn.Token.Literal
+}
+
+func (bn *BooleanNode) TokenLiteral() string {
+	return bn.Token.Literal
+}
+
+func (nn *NullNode) String() string {
+	return nn.Token.Literal
+}
+
+func (nn *NullNode) TokenLiteral() string {
+	return nn.Token.Literal
+}
+
+func (an *ArrayNode) String() string {
+	return fmt.Sprintf("%s", an.Value)
+}
+
+func (an *ArrayNode) TokenLiteral() string {
+	return fmt.Sprintf("%s", an.Value)
 }

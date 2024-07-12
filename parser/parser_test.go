@@ -51,18 +51,18 @@ func TestParser(t *testing.T) {
 		l := lexer.New(tc.input)
 		p := New(l)
 
-		result := p.parseJSON()
+		result, err := p.parseJSON()
 
 		if tc.shouldFail {
-			if result != -1 {
+			if err == nil {
 				t.Fatalf("Expected failure for input: %s, but got success", tc.input)
 			} else {
 				fmt.Printf("Correctly failed for input: %s with errors: %v\n", tc.input, p.errors)
 			}
 		} else {
-			if result == -1 {
+			if err != nil {
 				fmt.Print(p.errors)
-				t.Fatalf("parseJSON() returned -1 for input: %s", tc.input)
+				t.Fatalf("parseJSON() returned error for input: %s", tc.input)
 			} else {
 				fmt.Printf("Successfully parsed input: %s with result: %v\n", tc.input, result)
 			}

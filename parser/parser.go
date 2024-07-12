@@ -5,6 +5,7 @@ import (
 	"jeisaraja/json_parser/ast"
 	"jeisaraja/json_parser/lexer"
 	"jeisaraja/json_parser/token"
+	"strconv"
 )
 
 type Parser struct {
@@ -28,19 +29,20 @@ func (p *Parser) nextToken() {
 	p.peekToken = p.lexer.NextToken()
 }
 
-func (p *Parser) parseJSON() int {
+func (p *Parser) parseJSON() (ast.Node, error) {
+	var result ast.Node
 	switch p.curToken.Type {
 	case token.LBRACE:
-		p.parseObjectNode()
+		result = p.parseObjectNode()
 	case token.LBRACKET:
-		p.parseArrayObject()
+		p.parseArrayNode()
 	default:
 		p.error(fmt.Sprintf("Unexpected token %s", p.curToken.Literal))
 	}
 	if len(p.errors) > 0 {
-		return -1
+		return nil, fmt.Errorf("parsing errors: %v", p.errors)
 	}
-	return 0
+	return result, nil
 }
 
 func (p *Parser) parseObjectNode() *ast.ObjectNode {
@@ -50,13 +52,15 @@ func (p *Parser) parseObjectNode() *ast.ObjectNode {
 		return obj
 	}
 
+	p.nextToken()
 	for !p.peekTokenIs(token.RBRACE) {
-		p.nextToken()
 		if !p.curTokenIs(token.STRING) {
 			p.error("Expected string key")
 			return obj
 		}
 		key := &ast.StringNode{Token: p.curToken, Value: p.curToken.Literal}
+    fmt.Println("key is ", key.String())
+
 		p.nextToken()
 
 		if !p.curTokenIs(token.COLON) {
@@ -68,17 +72,17 @@ func (p *Parser) parseObjectNode() *ast.ObjectNode {
 		if value == nil {
 			return obj
 		}
+		pair := &ast.PairNode{Key: key, Value: value}
+		obj.Pairs = append(obj.Pairs, pair)
 	}
 
-	if !p.peekTokenIs(token.EOF) {
-		p.error("Not Valid, something after end of closing brace")
-		return obj
+	if p.curTokenIs(token.COMMA) {
+		p.nextToken()
 	}
 	return obj
 }
 
 func (p *Parser) peekTokenIs(t token.TokenType) bool {
-	fmt.Println(p.peekToken)
 	return t == p.peekToken.Type
 }
 
@@ -90,16 +94,48 @@ func (p *Parser) error(s string) {
 	p.errors = append(p.errors, s)
 }
 
-func (p *Parser) parseArrayObject() {
+func (p *Parser) parseArrayNode() *ast.ArrayNode {
+	node := &ast.ArrayNode{}
+	if p.curTokenIs(token.LBRACKET) {
+		p.error(fmt.Sprintf("token is not correct, expected %s, got %s", p.curToken.Literal, token.LBRACKET))
+	}
 
+	for !p.peekTokenIs(token.RBRACKET) {
+		p.nextToken()
+		value := p.parseValue()
+		if value != nil {
+			return node
+		}
+
+		node.Value = append(node.Value, value)
+		p.nextToken()
+		if p.curTokenIs(token.COMMA) {
+			p.nextToken()
+		} else if p.curTokenIs(token.RBRACKET) {
+			break
+		} else {
+			p.error("Expected ',' or ']' after value")
+			return node
+		}
+	}
+
+	if !p.curTokenIs(token.RBRACKET) {
+		p.error("Expected ']' at end of array")
+	}
+	return node
 }
 
 func (p *Parser) parseValue() ast.Node {
 	switch p.curToken.Type {
 	case token.STRING:
-		return &ast.StringNode{Value: p.curToken.Literal}
+		node := &ast.StringNode{Token: p.curToken, Value: p.curToken.Literal}
+		return node
 	case token.NUMBER:
-		return &ast.NumberNode{Value: p.curToken.Literal}
+		number, err := strconv.ParseFloat(p.curToken.Literal, 32)
+		if err != nil {
+			p.error(fmt.Sprintf("Failed to parse number for %s", p.curToken.Literal))
+		}
+		return &ast.NumberNode{Value: float32(number)}
 	case token.TRUE, token.FALSE:
 		return &ast.BooleanNode{Value: p.curToken.Literal == "true"}
 	case token.NULL:
