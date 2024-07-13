@@ -53,13 +53,14 @@ func (p *Parser) parseObjectNode() *ast.ObjectNode {
 	}
 
 	p.nextToken()
+	fmt.Println("curToken is ", p.curToken.Type)
 	for !p.peekTokenIs(token.RBRACE) {
 		if !p.curTokenIs(token.STRING) {
 			p.error("Expected string key")
 			return obj
 		}
 		key := &ast.StringNode{Token: p.curToken, Value: p.curToken.Literal}
-    fmt.Println("key is ", key.String())
+		fmt.Println("key is ", key.String())
 
 		p.nextToken()
 
@@ -96,24 +97,24 @@ func (p *Parser) error(s string) {
 
 func (p *Parser) parseArrayNode() *ast.ArrayNode {
 	node := &ast.ArrayNode{}
-	if p.curTokenIs(token.LBRACKET) {
+	if !p.curTokenIs(token.LBRACKET) {
 		p.error(fmt.Sprintf("token is not correct, expected %s, got %s", p.curToken.Literal, token.LBRACKET))
 	}
 
 	for !p.peekTokenIs(token.RBRACKET) {
 		p.nextToken()
+		fmt.Println("hey in looping the array node")
 		value := p.parseValue()
-		if value != nil {
+		if value == nil {
 			return node
 		}
-
 		node.Value = append(node.Value, value)
 		p.nextToken()
 		if p.curTokenIs(token.COMMA) {
-			p.nextToken()
 		} else if p.curTokenIs(token.RBRACKET) {
 			break
 		} else {
+			fmt.Println("curToken is ", p.curToken)
 			p.error("Expected ',' or ']' after value")
 			return node
 		}
@@ -135,7 +136,8 @@ func (p *Parser) parseValue() ast.Node {
 		if err != nil {
 			p.error(fmt.Sprintf("Failed to parse number for %s", p.curToken.Literal))
 		}
-		return &ast.NumberNode{Value: float32(number)}
+		n := float32(number)
+		return &ast.NumberNode{Token: p.curToken, Value: n}
 	case token.TRUE, token.FALSE:
 		return &ast.BooleanNode{Value: p.curToken.Literal == "true"}
 	case token.NULL:

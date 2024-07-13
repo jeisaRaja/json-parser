@@ -61,7 +61,9 @@ func TestParser(t *testing.T) {
 			}
 		} else {
 			if err != nil {
-				fmt.Print(p.errors)
+				for _, err := range p.errors {
+					fmt.Println("Error: ", err)
+				}
 				t.Fatalf("parseJSON() returned error for input: %s", tc.input)
 			} else {
 				fmt.Printf("Successfully parsed input: %s with result: %v\n", tc.input, result)
@@ -69,4 +71,3 @@ func TestParser(t *testing.T) {
 		}
 	}
 }
-
