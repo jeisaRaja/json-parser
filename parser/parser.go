@@ -53,7 +53,7 @@ func (p *Parser) parseObjectNode() *ast.ObjectNode {
 	}
 
 	p.nextToken()
-	for !p.peekTokenIs(token.RBRACE) {
+	for !p.peekTokenIs(token.RBRACE) && !p.curTokenIs(token.RBRACE) {
 		if !p.curTokenIs(token.STRING) {
 			p.error("Expected string key")
 			return obj
@@ -71,12 +71,12 @@ func (p *Parser) parseObjectNode() *ast.ObjectNode {
 		if value == nil {
 			return obj
 		}
+    fmt.Println(value.String())
 		pair := &ast.PairNode{Key: key, Value: value}
 		obj.Pairs = append(obj.Pairs, pair)
-		fmt.Println(obj.String())
 	}
 
-  p.nextToken()
+	p.nextToken()
 	return obj
 }
 
@@ -94,19 +94,16 @@ func (p *Parser) error(s string) {
 
 func (p *Parser) parseArrayNode() *ast.ArrayNode {
 	node := &ast.ArrayNode{}
-	if !p.curTokenIs(token.LBRACKET) {
-		p.error(fmt.Sprintf("token is not correct, expected %s, got %s", p.curToken.Literal, token.LBRACKET))
-	}
-
-	for !p.peekTokenIs(token.RBRACKET) {
-		p.nextToken()
+	p.nextToken()
+	for  !p.curTokenIs(token.RBRACKET) {
 		value := p.parseValue()
 		if value == nil {
 			return node
 		}
 		node.Value = append(node.Value, value)
 		p.nextToken()
-		if p.curTokenIs(token.COMMA) {
+		if p.curTokenIs(token.COMMA) && !p.peekTokenIs(token.RBRACKET) {
+			p.nextToken()
 		} else if p.curTokenIs(token.RBRACKET) {
 			break
 		} else {
@@ -115,10 +112,12 @@ func (p *Parser) parseArrayNode() *ast.ArrayNode {
 		}
 	}
 
-	if !p.curTokenIs(token.RBRACKET) {
+  fmt.Println("curToken is ", p.curToken)
+	if p.curTokenIs(token.STRING) && !p.peekTokenIs(token.RBRACKET) || p.curTokenIs(token.RBRACE) && !p.peekTokenIs(token.RBRACKET) {
 		p.error("Expected ']' at end of array")
 		return node
 	}
+  p.nextToken()
 	return node
 }
 
