@@ -1,6 +1,7 @@
 package ast
 
 import (
+	"bytes"
 	"fmt"
 	"jeisaraja/json_parser/token"
 )
@@ -28,7 +29,14 @@ type NullNode struct {
 }
 
 func (on *ObjectNode) String() string {
-	return ""
+	var out bytes.Buffer
+	for _, pair := range on.Pairs {
+		out.WriteString("key :  ")
+		out.WriteString(pair.Key.String())
+		out.WriteString("  value :  ")
+		out.WriteString(pair.Value.String())
+	}
+	return out.String()
 }
 
 func (on *ObjectNode) TokenLiteral() string {

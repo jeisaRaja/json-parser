@@ -53,14 +53,12 @@ func (p *Parser) parseObjectNode() *ast.ObjectNode {
 	}
 
 	p.nextToken()
-	fmt.Println("curToken is ", p.curToken.Type)
 	for !p.peekTokenIs(token.RBRACE) {
 		if !p.curTokenIs(token.STRING) {
 			p.error("Expected string key")
 			return obj
 		}
 		key := &ast.StringNode{Token: p.curToken, Value: p.curToken.Literal}
-		fmt.Println("key is ", key.String())
 
 		p.nextToken()
 
@@ -75,11 +73,10 @@ func (p *Parser) parseObjectNode() *ast.ObjectNode {
 		}
 		pair := &ast.PairNode{Key: key, Value: value}
 		obj.Pairs = append(obj.Pairs, pair)
+		fmt.Println(obj.String())
 	}
 
-	if p.curTokenIs(token.COMMA) {
-		p.nextToken()
-	}
+  p.nextToken()
 	return obj
 }
 
@@ -103,7 +100,6 @@ func (p *Parser) parseArrayNode() *ast.ArrayNode {
 
 	for !p.peekTokenIs(token.RBRACKET) {
 		p.nextToken()
-		fmt.Println("hey in looping the array node")
 		value := p.parseValue()
 		if value == nil {
 			return node
@@ -114,7 +110,6 @@ func (p *Parser) parseArrayNode() *ast.ArrayNode {
 		} else if p.curTokenIs(token.RBRACKET) {
 			break
 		} else {
-			fmt.Println("curToken is ", p.curToken)
 			p.error("Expected ',' or ']' after value")
 			return node
 		}
@@ -122,6 +117,7 @@ func (p *Parser) parseArrayNode() *ast.ArrayNode {
 
 	if !p.curTokenIs(token.RBRACKET) {
 		p.error("Expected ']' at end of array")
+		return node
 	}
 	return node
 }
